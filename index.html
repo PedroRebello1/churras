@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Website with Geolocation</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2rem;
+        }
+
+        video {
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Olá,</h1>
+    <h1 id="namePlaceholder">namePlaceholder</h1>
+
+    <video controls>
+        <source src="churras.mp4" type="video/mp4" media="(min-width: 100px)">
+    </video>
+
+    <script>
+        const locations = {
+            "Jardim Botânico": { lat: -15.84063996572491, lng: -47.80053019832554, name: "Pedro" },
+            "Lago Sul": { lat: -15.84308666330114, lng: -47.84447280321528, name: "Ludmylla" },
+            "Arniqueiras": { lat: -15.854674140363441, lng: -48.007854954044014, name: "Milla" },
+            "Sudoeste": { lat: -15.792659899322551, lng: -47.93355117998099, name: "Beiça" },
+            "Noroeste": { lat: -15.751965551866844, lng: -47.909716622050475, name: "Navarro" }
+        };
+    
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Radius of the Earth in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a =
+                0.5 - Math.cos(dLat)/2 +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                (1 - Math.cos(dLon))/2;
+    
+            return R * 2 * Math.asin(Math.sqrt(a));
+        }
+    
+        function findClosestLocation(userLat, userLng) {
+            let closestLocation = null;
+            let minDistance = Infinity;
+    
+            for (const location in locations) {
+                const { lat, lng, name } = locations[location];
+                const distance = calculateDistance(userLat, userLng, lat, lng);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestLocation = name;
+                }
+            }
+    
+            return closestLocation;
+        }
+    
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                const userLat = position.coords.latitude;
+                const userLng = position.coords.longitude;
+                const closestName = findClosestLocation(userLat, userLng);
+                console.log(userLat)
+                console.log(userLng)
+                document.getElementById("namePlaceholder").textContent = closestName;
+            }, function(error) {
+                console.error("Error getting location: ", error);
+            });
+        } else {
+            console.error("Geolocation is not supported by this browser.");
+        }
+
+    </script>
+    
+</body>
+</html>
